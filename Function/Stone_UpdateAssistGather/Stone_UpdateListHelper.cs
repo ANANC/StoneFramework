@@ -59,15 +59,18 @@ public class Stone_UpdateListHelper
             m_AddUpdateObjectList.Clear();
         }
 
-        int deleteCount = m_DeleteUpdateObjectList.Count;
-        if (deleteCount > 0)
+        if (m_DeleteUpdateObjectList != null)
         {
-            for (int index = 0; index < deleteCount; index++)
+            int deleteCount = m_DeleteUpdateObjectList.Count;
+            if (deleteCount > 0)
             {
-                updateObjcect = m_DeleteUpdateObjectList[index];
-                m_UpdateObjectList.Remove(updateObjcect);
+                for (int index = 0; index < deleteCount; index++)
+                {
+                    updateObjcect = m_DeleteUpdateObjectList[index];
+                    m_UpdateObjectList.Remove(updateObjcect);
+                }
+                m_DeleteUpdateObjectList.Clear();
             }
-            m_DeleteUpdateObjectList.Clear();
         }
 
         int updateCount = m_UpdateObjectList.Count;

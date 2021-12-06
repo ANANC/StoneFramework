@@ -38,12 +38,12 @@ public class Stone_CoreControl
     // --- 管理器功能
 
     //获取管理器
-    public Stone_Manager GetManager(string manangerName)
+    public T GetManager<T>(string managerName) where T : Stone_Manager
     {
         Stone_Manager manager;
-        if(m_ManagerDict.TryGetValue(manangerName,out manager))
+        if(m_ManagerDict.TryGetValue(managerName, out manager))
         {
-            return manager;
+            return (T)manager;
         }
 
         return null;
@@ -51,7 +51,7 @@ public class Stone_CoreControl
 
 
     // 添加管理器
-    public Stone_Manager AddManager(Stone_Manager manager,bool isUpdate = false)
+    public Stone_Manager AddManager(Stone_Manager manager,bool isUpdate)
     {
         if(m_ManagerDict.ContainsKey(manager.GetName()))
         {
@@ -59,6 +59,12 @@ public class Stone_CoreControl
         }
 
         manager.Init();
+
+        Stone_IManagerLifeControl lifeControl = manager.GetLifeControl();
+        if(lifeControl !=null)
+        {
+            lifeControl.InitAfter(manager);
+        }
 
         m_ManagerList.Add(manager);
         m_ManagerDict.Add(manager.GetName(), manager);
@@ -69,7 +75,7 @@ public class Stone_CoreControl
     }
 
     // 激活管理器
-    public void ActiveManager(Stone_Manager manager, bool isUpdate = false)
+    public void ActiveManager(Stone_Manager manager, bool isUpdate)
     {
         if (m_ActiveManagerDict.ContainsKey(manager.GetName()))
         {

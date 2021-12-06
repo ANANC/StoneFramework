@@ -5,9 +5,17 @@ using UnityEngine;
 public abstract class Stone_Manager : Stone_UpdateListHelper.UpdateObjcect
 {
 
+    private Stone_IManagerLifeControl m_LifeControl;
+
+    public Stone_Manager(Stone_IManagerLifeControl stone_ManagerLifeControl)
+    {
+        m_LifeControl = stone_ManagerLifeControl;
+    }
+
     public Stone_Manager()
     {
     }
+
 
     //---生命周期函数
 
@@ -39,4 +47,8 @@ public abstract class Stone_Manager : Stone_UpdateListHelper.UpdateObjcect
 
     public abstract string GetName();
 
+    public Stone_IManagerLifeControl GetLifeControl()
+    {
+        return m_LifeControl;
+    }
 }
