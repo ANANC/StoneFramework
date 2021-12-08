@@ -77,11 +77,10 @@ public class Stone_UserConfigManager : Stone_Manager
     /// <typeparam name="T"></typeparam>
     /// <param name="configName"></param>
     /// <returns></returns>
-    private T LoadConfig<T>() where T : Stone_BaseUserConfigData
+    private T LoadConfig<T>(string configName) where T : Stone_BaseUserConfigData
     {
         Stone_BaseUserConfigData configData = null;
 
-        string configName = GetConfigName<T>();
         if (m_UserConfigDataDict.TryGetValue(configName, out configData))
         {
             return (T)configData;
@@ -116,7 +115,17 @@ public class Stone_UserConfigManager : Stone_Manager
     /// <returns></returns>
     public T GetConfig<T>() where T : Stone_BaseUserConfigData
     {
-        T configData = LoadConfig<T>();
+        string configName = GetConfigName<T>();
+
+        T configData = LoadConfig<T>(configName);
+
+        return configData;
+    }
+
+    public T GetConfig<T>(string name) where T : Stone_BaseUserConfigData
+    {
+        T configData = LoadConfig<T>(name);
+
         return configData;
     }
 }

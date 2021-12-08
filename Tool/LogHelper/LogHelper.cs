@@ -15,7 +15,7 @@ public class LogHelper
         Error = 5
     }
 
-    private static LogGrade m_LogGrade = LogGrade.Trace;
+    private static LogGrade m_LogGrade = LogGrade.Error;
     private static StringBuilder m_LogStringBuilder = new StringBuilder();
 
     private static StringBuilder m_Obj2StrStringBuilder = new StringBuilder();
@@ -26,11 +26,6 @@ public class LogHelper
         protected static LogGrade m_LogGrade;
         public void Log(params string[] message)
         {
-            if (m_LogGrade < LogHelper.m_LogGrade)
-            {
-                return;
-            }
-
             if (message.Length <= 0)
             {
                 return;

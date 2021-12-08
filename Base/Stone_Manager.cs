@@ -39,7 +39,7 @@ public abstract class Stone_Manager : Stone_UpdateListHelper.UpdateObjcect
     }
 
     //销毁 只执行一次
-    public virtual void Destroy()
+    public virtual void UnInit()
     {
     }
 

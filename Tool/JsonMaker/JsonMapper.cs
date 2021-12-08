@@ -405,6 +405,7 @@ namespace LitJson
                 if (inst_type.IsEnum)
                     return Enum.ToObject (inst_type, reader.Value);
 
+
                 // Try using an implicit conversion operator
                 MethodInfo conv_op = GetConvOp (inst_type, json_type);
 
@@ -931,6 +932,36 @@ namespace LitJson
                 }
                 writer.WriteObjectEnd ();
 
+                return;
+            }
+
+            if (obj is UnityEngine.Vector3)
+            {
+                writer.WriteObjectStart();
+                UnityEngine.Vector3 v3Obj = (UnityEngine.Vector3)obj;
+                writer.WritePropertyName("x");
+                WriteValue(v3Obj.x, writer, writer_is_private,depth + 1);
+                writer.WritePropertyName("y");
+                WriteValue(v3Obj.y, writer, writer_is_private, depth + 1);
+                writer.WritePropertyName("z");
+                WriteValue(v3Obj.z, writer, writer_is_private, depth + 1);
+                writer.WriteObjectEnd();
+                return;
+            }
+
+            if (obj is UnityEngine.Color)
+            {
+                writer.WriteObjectStart();
+                UnityEngine.Color colorObj = (UnityEngine.Color)obj;
+                writer.WritePropertyName("r");
+                WriteValue(colorObj.r, writer, writer_is_private, depth + 1);
+                writer.WritePropertyName("g");
+                WriteValue(colorObj.g, writer, writer_is_private, depth + 1);
+                writer.WritePropertyName("b");
+                WriteValue(colorObj.b, writer, writer_is_private, depth + 1);
+                writer.WritePropertyName("a");
+                WriteValue(colorObj.a, writer, writer_is_private, depth + 1);
+                writer.WriteObjectEnd();
                 return;
             }
 

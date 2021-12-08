@@ -30,7 +30,7 @@ public class Stone_CoreControl
     {
         for (int index = 0; index < m_ManagerList.Count; index++)
         {
-            m_ManagerList[index].Destroy();
+            m_ManagerList[index].UnInit();
         }
         m_ManagerList.Clear();
     }
@@ -115,7 +115,7 @@ public class Stone_CoreControl
         m_ManagerList.Remove(manager);
         m_ManagerDict.Remove(manager.GetName());
 
-        manager.Destroy();
+        manager.UnInit();
     }
 
 
