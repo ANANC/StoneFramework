@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 public class Stone_EventObject 
@@ -17,6 +18,8 @@ public class Stone_EventObject
     private Dictionary<Delegate, int> m_AllRegisterDict;
     private List<Delegate> m_AllRegisterList;
 
+    private object[] m_CallbackParams;
+
     private bool m_IsDirty;
 
     public void Init(string name)
@@ -30,6 +33,8 @@ public class Stone_EventObject
 
         m_AllRegisterDict = new Dictionary<Delegate, int>();
         m_AllRegisterList = new List<Delegate>();
+
+        m_CallbackParams = new object[1];
 
         m_IsDirty = false;
     }
@@ -50,7 +55,7 @@ public class Stone_EventObject
     /// <param name="sort"></param>
     public void AddListener(Action listener,int sort = -1)
     {
-        AddListener(listener, sort);
+        _AddListener(listener, sort);
     }
 
     /// <summary>
@@ -58,12 +63,12 @@ public class Stone_EventObject
     /// </summary>
     /// <param name="listener"></param>
     /// <param name="sort"></param>
-    public void AddListener(Action<EventCallbackInfo> listener, int sort = -1)
+    public void AddListener<T>(Action<T> listener, int sort = -1) where T : EventCallbackInfo
     {
-        AddListener(listener, sort);
+        _AddListener(listener, sort);
     }
 
-    private void AddListener(Delegate listener, int sort)
+    private void _AddListener(Delegate listener, int sort)
     {
         if (m_AllRegisterDict.ContainsKey(listener))
         {
@@ -125,29 +130,18 @@ public class Stone_EventObject
         {
             Delegate listener = m_AllRegisterList[index];
 
-            if (listener is Action)
+            m_CallbackParams[0] = info;
+
+            object target = listener.Target;
+            MethodInfo method = listener.Method;
+
+            try
             {
-                Action action = (Action)listener;
-                try
-                {
-                    action();
-                }
-                catch (Exception exception)
-                {
-                    LogHelper.Error?.Log("Event", m_Name, "Execute Error.", exception.Message);
-                }
+                method.Invoke(target, m_CallbackParams);
             }
-            if (listener is Action<EventCallbackInfo>)
+            catch (Exception exception)
             {
-                Action<EventCallbackInfo> paramAction = (Action<EventCallbackInfo>)listener;
-                try
-                {
-                    paramAction(info);
-                }
-                catch (Exception exception)
-                {
-                    LogHelper.Error?.Log("Event", m_Name, "Execute Error.", exception.Message);
-                }
+                LogHelper.Error?.Log("Event", m_Name, "Execute Error.", exception.Message, exception.StackTrace);
             }
         }
 

@@ -17,7 +17,11 @@ public class Stone_UpdateListHelper
     {
         m_UpdateObjectList = new List<UpdateObjcect>();
         m_AddUpdateObjectList = new List<UpdateObjcect>();
+
+        Init();
     }
+
+    protected virtual void Init() { }
 
     public virtual void Add(UpdateObjcect updateObjcect)
     {
@@ -31,12 +35,7 @@ public class Stone_UpdateListHelper
 
     public virtual void Delete(UpdateObjcect updateObjcect)
     {
-        if (!m_UpdateObjectList.Contains(updateObjcect))
-        {
-            return;
-        }
-
-        if(m_DeleteUpdateObjectList==null)
+        if (m_DeleteUpdateObjectList == null)
         {
             m_DeleteUpdateObjectList = new List<UpdateObjcect>();
         }
@@ -45,6 +44,22 @@ public class Stone_UpdateListHelper
     }
 
     public virtual void Update()
+    {
+        UpdateBeforeRight();
+
+        UpdateObjcect updateObjcect;
+        int updateCount = m_UpdateObjectList.Count;
+        if(updateCount>0)
+        {
+            for(int index = 0;index<updateCount;index++)
+            {
+                updateObjcect = m_UpdateObjectList[index];
+                updateObjcect.Update();
+            }
+        }
+    }
+
+    public void UpdateBeforeRight()
     {
         UpdateObjcect updateObjcect;
 
@@ -70,16 +85,6 @@ public class Stone_UpdateListHelper
                     m_UpdateObjectList.Remove(updateObjcect);
                 }
                 m_DeleteUpdateObjectList.Clear();
-            }
-        }
-
-        int updateCount = m_UpdateObjectList.Count;
-        if(updateCount>0)
-        {
-            for(int index = 0;index<updateCount;index++)
-            {
-                updateObjcect = m_UpdateObjectList[index];
-                updateObjcect.Update();
             }
         }
     }

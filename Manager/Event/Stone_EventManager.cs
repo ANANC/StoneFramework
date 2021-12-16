@@ -59,7 +59,7 @@ public class Stone_EventManager : Stone_Manager
     /// <param name="name"></param>
     /// <param name="target"></param>
     /// <param name="listener"></param>
-    public void AddListener(string name,object target, Action<Stone_EventObject.EventCallbackInfo> listener)
+    public void AddListener<T>(string name,object target, Action<T> listener) where T: Stone_EventObject.EventCallbackInfo
     {
         Stone_EventObject eventObject;
         if (!m_EventObjectDict.TryGetValue(name, out eventObject))
@@ -162,7 +162,13 @@ public class Stone_EventManager : Stone_Manager
     /// <param name="info"></param>
     public void Execute(string name, Stone_EventObject.EventCallbackInfo info = null)
     {
+        Stone_EventObject eventObject;
+        if (!m_EventObjectDict.TryGetValue(name, out eventObject))
+        {
+            return;
+        }
 
+        eventObject.Execute(info);
     }
 
 }
