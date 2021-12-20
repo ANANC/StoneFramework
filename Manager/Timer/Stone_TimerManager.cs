@@ -41,14 +41,14 @@ public class Stone_TimerManager : Stone_Manager
         }
     }
 
-    public int StarTimer(Action callback, Action finish = null,float interval = -1, float updateTime = -1)
+    public int StarTimer(Action callback, Action finish = null,float interval = -1, float updateCount = -1)
     {
         int id = m_AutoId++;
 
         Stone_Timer stone_Timer = new Stone_Timer();
         stone_Timer.Init();
 
-        stone_Timer.Active(id, updateTime, interval, callback, finish);
+        stone_Timer.Active(id, updateCount, interval, callback, finish);
 
         m_TimerUpdateList.Add(stone_Timer);
         m_TimerDict.Add(id, stone_Timer);
