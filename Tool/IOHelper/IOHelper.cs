@@ -46,6 +46,23 @@ public class IOHelper
     }
 
     /// <summary>
+    /// 获得文件夹路径
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>
+    public static string GetDirectoryName(string path)
+    {
+        int index = path.IndexOf("/");
+        if (index != -1)
+        {
+            string parent = path.Remove(index, path.Length - index);
+            return parent;
+        }
+
+        return string.Empty;
+    }
+
+    /// <summary>
     /// 安全拷贝文件
     /// </summary>
     /// <param name="recover"></param>

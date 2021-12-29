@@ -93,9 +93,27 @@ public class Stone_EditorResourceLoader : Stone_IResourceLoader
             assetbundle = resourcePath;
         }
 
-        ConfigureInfo info = GetConfigureInfo(assetbundle);
+        ConfigureInfo info = null;
+        do
+        {
+            info = GetConfigureInfo(assetbundle);
+            if(info!=null)
+            {
+                break;
+            }
+
+            assetbundle = IOHelper.GetDirectoryName(resourcePath);
+            info = GetConfigureInfo(assetbundle);
+            if (info != null)
+            {
+                break;
+            }
+
+        } while (false);
+
         if (info == null)
         {
+            LogHelper.Error?.Log(Stone_ResourceManager.Name, "编辑器模式下找不到资源。", assetbundle); 
             return resource;
         }
 
@@ -164,7 +182,7 @@ public class Stone_EditorResourceLoader : Stone_IResourceLoader
         //参数=别名/路径，根据名称获取配置
         if (!m_AssetBundleNameToInfoDict.TryGetValue(assetbundle, out info))
         {
-            LogHelper.Error?.Log(Stone_ResourceManager.Name,"编辑器模式下找不到资源。", assetbundle);
+            return null;
         }
 
         return info;
@@ -180,6 +198,7 @@ public class Stone_EditorResourceLoader : Stone_IResourceLoader
 
         if(info == null)
         {
+            LogHelper.Error?.Log(Stone_ResourceManager.Name, "编辑器模式下找不到资源。", assetbundle);
             return;
         }
 
