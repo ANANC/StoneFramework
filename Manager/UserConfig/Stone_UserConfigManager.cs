@@ -128,4 +128,16 @@ public class Stone_UserConfigManager : Stone_Manager
 
         return configData;
     }
+
+    /// <summary>
+    /// 穿入字符串得到获得配置类
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="content"></param>
+    /// <returns></returns>
+    public T GetConfigByUserContent<T>(string content)
+    {
+        T configData = LitJson.JsonMapper.ToObject<T>(content);
+        return configData;
+    }
 }

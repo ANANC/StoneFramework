@@ -11,7 +11,7 @@ public class Stone_Timer : Stone_UpdateListHelper.UpdateObjcect
     private float m_UpdateCount;
     private float m_Interval;
     private Action m_Callback;
-    private Action m_FinishCallback;
+    private Action<bool> m_FinishCallback;
 
     private float m_CurTime;
     private float m_CurTotalCount;
@@ -38,7 +38,7 @@ public class Stone_Timer : Stone_UpdateListHelper.UpdateObjcect
         m_Delta = delta;
     }
 
-    public void Active(int id,float updateCount,float interval,Action callback,Action finsih)
+    public void Active(int id,float updateCount,float interval,Action callback,Action<bool> finsih)
     {
         m_Id = id;
 
@@ -72,7 +72,7 @@ public class Stone_Timer : Stone_UpdateListHelper.UpdateObjcect
             }
             catch (Exception exception)
             {
-                LogHelper.Error?.Log(Stone_TimerManager.Name, "timer execute error.", exception.Message, exception.StackTrace);
+                LogHelper.Error?.Log(Stone_TimerManager.Name, "timer execute error. ", exception.Message, "\n", exception.StackTrace);
             }
         }
 
@@ -84,11 +84,12 @@ public class Stone_Timer : Stone_UpdateListHelper.UpdateObjcect
 
                 try
                 {
-                    m_FinishCallback?.Invoke();
+                    //正常结束
+                    m_FinishCallback?.Invoke(false);
                 }
                 catch (Exception exception)
                 {
-                    LogHelper.Error?.Log(Stone_TimerManager.Name, "timer finish execute error.", exception.Message, exception.StackTrace);
+                    LogHelper.Error?.Log(Stone_TimerManager.Name, "timer finish execute error. ", exception.Message,"\n", exception.StackTrace);
                 }
             }
         }
@@ -96,15 +97,21 @@ public class Stone_Timer : Stone_UpdateListHelper.UpdateObjcect
 
     public void ForceFinish()
     {
+        if (m_IsFinish)
+        {
+            return;
+        }
+
         m_IsFinish = true;
 
         try
         {
-            m_FinishCallback?.Invoke();
+            //强制结束
+            m_FinishCallback?.Invoke(true);
         }
         catch (Exception exception)
         {
-            LogHelper.Error?.Log(Stone_TimerManager.Name, "timer finish execute error.", exception.Message, exception.StackTrace);
+            LogHelper.Error?.Log(Stone_TimerManager.Name, "timer finish execute error. ", exception.Message, "\n", exception.StackTrace);
         }
     }
 

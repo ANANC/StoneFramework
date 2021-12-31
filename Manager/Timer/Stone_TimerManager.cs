@@ -41,7 +41,7 @@ public class Stone_TimerManager : Stone_Manager
         }
     }
 
-    public int StarTimer(Action callback, Action finish = null,float interval = -1, float updateCount = -1)
+    public int StarTimer(Action callback, Action<bool> finish = null,float interval = -1, float updateCount = -1)
     {
         int id = m_AutoId++;
 
