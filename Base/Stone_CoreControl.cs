@@ -28,7 +28,7 @@ public class Stone_CoreControl
 
     public void Destroy()
     {
-        for (int index = 0; index < m_ManagerList.Count; index++)
+        for (int index = m_ManagerList.Count-1; index >= 0; index--)
         {
             m_ManagerList[index].UnInit();
         }

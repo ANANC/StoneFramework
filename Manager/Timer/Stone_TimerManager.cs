@@ -21,7 +21,7 @@ public class Stone_TimerManager : Stone_Manager
         m_TimerDict = new Dictionary<int, Stone_Timer>();
         m_TimerUpdateList = new Stone_TimerUpdateList();
 
-        m_AutoId = 0;
+        m_AutoId = 1;
     }
 
     public override void UnInit()
@@ -41,14 +41,14 @@ public class Stone_TimerManager : Stone_Manager
         }
     }
 
-    public int StarTimer(Action callback, Action<bool> finish = null,float interval = -1, float updateCount = -1)
+    public int StarTimer(Action callback, Action<bool> finish = null,float interval = -1, float updateTime = -1)
     {
         int id = m_AutoId++;
 
         Stone_Timer stone_Timer = new Stone_Timer();
         stone_Timer.Init();
 
-        stone_Timer.Active(id, updateCount, interval, callback, finish);
+        stone_Timer.Active(id, updateTime, interval, callback, finish);
 
         m_TimerUpdateList.Add(stone_Timer);
         m_TimerDict.Add(id, stone_Timer);

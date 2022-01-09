@@ -8,13 +8,13 @@ public class Stone_Timer : Stone_UpdateListHelper.UpdateObjcect
     private int m_Id;
     private float m_Delta;
 
-    private float m_UpdateCount;
+    private float m_UpdateTime;
     private float m_Interval;
     private Action m_Callback;
     private Action<bool> m_FinishCallback;
 
     private float m_CurTime;
-    private float m_CurTotalCount;
+    private float m_CurTotalTime;
 
     private bool m_IsFinish;
 
@@ -38,17 +38,17 @@ public class Stone_Timer : Stone_UpdateListHelper.UpdateObjcect
         m_Delta = delta;
     }
 
-    public void Active(int id,float updateCount,float interval,Action callback,Action<bool> finsih)
+    public void Active(int id,float updateTime,float interval,Action callback,Action<bool> finsih)
     {
         m_Id = id;
 
-        m_UpdateCount = updateCount;
+        m_UpdateTime = updateTime;
         m_Interval = interval;
         m_Callback = callback;
         m_FinishCallback = finsih;
 
         m_CurTime = 0;
-        m_CurTotalCount = 0;
+        m_CurTotalTime = 0;
         m_IsFinish = false;
     }
 
@@ -60,11 +60,11 @@ public class Stone_Timer : Stone_UpdateListHelper.UpdateObjcect
         }
 
         m_CurTime += m_Delta;
+        m_CurTotalTime += m_Delta;
 
         if (m_CurTime >= m_Interval)
         {
             m_CurTime = 0;
-            m_CurTotalCount += 1;
 
             try
             {
@@ -76,9 +76,9 @@ public class Stone_Timer : Stone_UpdateListHelper.UpdateObjcect
             }
         }
 
-        if(m_UpdateCount != -1)
+        if(m_UpdateTime != -1)
         {
-            if(m_CurTotalCount >= m_UpdateCount)
+            if(m_CurTotalTime >= m_UpdateTime)
             {
                 m_IsFinish = true;
 

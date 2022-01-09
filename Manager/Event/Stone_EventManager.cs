@@ -101,7 +101,7 @@ public class Stone_EventManager : Stone_Manager
     /// <param name="name"></param>
     /// <param name="target"></param>
     /// <param name="listener"></param>
-    public void DeleteListener(string name, object target, Delegate listener)
+    public void DeleteListener<T>(string name, object target, Action<T> listener) where T : Stone_EventObject.EventCallbackInfo
     {
         Stone_EventObject eventObject;
         if (!m_EventObjectDict.TryGetValue(name, out eventObject))

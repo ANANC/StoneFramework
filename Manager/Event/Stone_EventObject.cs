@@ -21,6 +21,7 @@ public class Stone_EventObject
     private object[] m_CallbackParams;
 
     private bool m_IsDirty;
+    private bool m_IsExecute;
 
     public void Init(string name)
     {
@@ -36,6 +37,7 @@ public class Stone_EventObject
 
         m_CallbackParams = new object[1];
 
+        m_IsExecute = false;
         m_IsDirty = false;
     }
 
@@ -56,6 +58,8 @@ public class Stone_EventObject
     public void AddListener(Action listener,int sort = -1)
     {
         _AddListener(listener, sort);
+
+        TryRefresh();
     }
 
     /// <summary>
@@ -66,12 +70,15 @@ public class Stone_EventObject
     public void AddListener<T>(Action<T> listener, int sort = -1) where T : EventCallbackInfo
     {
         _AddListener(listener, sort);
+
+        TryRefresh();
     }
 
     private void _AddListener(Delegate listener, int sort)
     {
         if (m_AllRegisterDict.ContainsKey(listener))
         {
+            LogHelper.Error?.Log("Event", m_Name, "AddListener Error. Repeat.",LogHelper.Object2String(listener));
             return;
         }
 
@@ -116,6 +123,8 @@ public class Stone_EventObject
         m_IsDirty = true;
 
         m_DeleteList.Add(listener);
+
+        TryRefresh();
     }
 
     /// <summary>
@@ -126,30 +135,62 @@ public class Stone_EventObject
     {
         TryRefresh();
 
+        m_IsExecute = true;
+
+        m_CallbackParams[0] = info;
+
         for (int index = 0; index < m_AllRegisterList.Count; index++)
         {
             Delegate listener = m_AllRegisterList[index];
 
-            m_CallbackParams[0] = info;
-
             object target = listener.Target;
             MethodInfo method = listener.Method;
 
-            try
+            //try
             {
-                method.Invoke(target, m_CallbackParams);
+                if(target == null)
+                {
+                    LogHelper.Error?.Log("Event", m_Name, "Execute Error. target is null.",LogHelper.Object2String(listener));
+
+                    DeleteListern(listener);
+                    continue;
+                }
+
+                if (method == null)
+                {
+                    LogHelper.Error?.Log("Event", m_Name, "Execute Error. method is null.", LogHelper.Object2String(listener));
+
+                    DeleteListern(listener);
+                    continue;
+                }
+
+                if (info == null)
+                {
+                    method.Invoke(target,null);
+                }
+                else
+                {
+                    method.Invoke(target, m_CallbackParams);
+                }
             }
-            catch (Exception exception)
-            {
-                LogHelper.Error?.Log("Event", m_Name, "Execute Error.", exception.Message, exception.StackTrace);
-            }
+            //catch (Exception exception)
+            //{
+            //    LogHelper.Error?.Log("Event", m_Name, "Execute Error.", exception.Message,"\n", exception.StackTrace);
+            //}
         }
+
+        m_IsExecute = false;
 
         TryRefresh();
     }
 
     private void TryRefresh()
     {
+        if(m_IsExecute)
+        {
+            return;
+        }
+
         if (m_IsDirty == false)
         {
             return;
@@ -202,5 +243,10 @@ public class Stone_EventObject
         int rightSort = m_AllRegisterDict[right];
 
         return leftSort.CompareTo(rightSort);
+    }
+
+    public bool IsExecute()
+    {
+        return m_IsExecute;
     }
 }
