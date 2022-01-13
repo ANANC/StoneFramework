@@ -6,12 +6,13 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
-using static Stone_EditorResourceLoader;
+using static Stone_ResourceManager;
 
 public class AssetBundleBuilder
 {
     private const string AssetBundleDirectory = "../output/AssetBundles";
     private readonly string ProjectPath = Application.dataPath.Replace("Assets", string.Empty);
+    private readonly string AssetPath = Application.dataPath + "/";
     private const string ManifestName = "Main";
 
     public class BuildInfo
@@ -37,6 +38,13 @@ public class AssetBundleBuilder
     private string m_BuildTargetName;
 
     private Dictionary<string, BuildInfo> m_BuildInfoDict;
+
+    [MenuItem("Stone/Build AssetBundle/Clean All", false, 200)]
+    public static void CleanAll()
+    {
+        AssetBundleBuilder assetBundleBuilder = new AssetBundleBuilder();
+        assetBundleBuilder.ClearAssetBundle();
+    }
 
 
     [MenuItem("Stone/Build AssetBundle/Windows", false, 200)]
@@ -134,10 +142,12 @@ public class AssetBundleBuilder
 
         AssetBundleBuild[] builds = new AssetBundleBuild[m_BuildInfoDict.Count];
         int index = 0;
-        foreach (KeyValuePair<string, BuildInfo> keyValuePair in m_BuildInfoDict)
+        Dictionary<string, BuildInfo>.Enumerator enumerator = m_BuildInfoDict.GetEnumerator();
+        while (enumerator.MoveNext())
         {
-            builds[index] = keyValuePair.Value.AssetBundleBuild;
-            index += 1;
+            BuildInfo info = enumerator.Current.Value;
+            info.AssetBundleBuild.assetBundleName = info.AssetBundleBuild.assetBundleName.Replace("/", "@");
+            builds[index++] = info.AssetBundleBuild;
         }
         m_BuildInfoDict.Clear();
 
@@ -273,23 +283,25 @@ public class AssetBundleBuilder
                     continue;
                 }
 
-                AssetBundleBuild_FileToAssetBundle(dependPath, dependPath.Replace(Application.dataPath + "/", string.Empty));
+                string dependenceUserName = dependPath.Replace(AssetPath, string.Empty);
+                dependenceUserName = dependenceUserName.Replace(m_OutputPath+"/", string.Empty);
+                AssetBundleBuild_FileToAssetBundle(dependPath, dependenceUserName);
             }
         }
 
         AssetBundleBuild_FileToAssetBundle(filePath, userName);
     }
 
-    private void BuildConfigure_DirectoryEventFileToAB(string directoryPath, string loadPath = null) //"Game/Reousrce/Prefab"
+    private void BuildConfigure_DirectoryEventFileToAB(string directoryPath, string userName = null) //"Game/Reousrce/Prefab"
     {
         if (!Directory.Exists(directoryPath))
         {
             return;
         }
 
-        if (string.IsNullOrEmpty(loadPath))
+        if (string.IsNullOrEmpty(userName))
         {
-            loadPath = directoryPath;
+            userName = directoryPath;
         }
 
         List<string> fileList = new List<string>();
@@ -297,9 +309,10 @@ public class AssetBundleBuilder
 
         for (int index = 0; index < fileList.Count; index++)
         {
-            string filePath = directoryPath + "/" + fileList[index];
-            string userName = loadPath + "/" + fileList[index];
-            AssetBundleBuild_FileToAssetBundle(filePath, userName);
+            string curFilePath = fileList[index].Replace("\\", "/");
+            string curUserName = fileList[index].Replace("\\", "/").Replace(directoryPath, userName);
+
+            AssetBundleBuild_FileToAssetBundle(curFilePath, curUserName);
         }
     }
 
@@ -312,13 +325,14 @@ public class AssetBundleBuilder
 
         string extension = Path.GetExtension(userName);
         string assetBundleName = userName.Replace(extension, string.Empty);
+        assetBundleName = assetBundleName.Replace(AssetPath, string.Empty);
 
         BuildInfo assetBundleBuild;
         if (!m_BuildInfoDict.TryGetValue(assetBundleName, out assetBundleBuild))
         {
             assetBundleBuild = new BuildInfo(filePath, userName);
             assetBundleBuild.AssetBundleBuild.assetBundleName = assetBundleName + ".unity3d";
-            assetBundleBuild.AssetBundleBuild.assetNames = new string[] { filePath.Replace(ProjectPath, string.Empty) };
+            assetBundleBuild.AssetBundleBuild.assetNames = new string[] { filePath.Replace(AssetPath, string.Empty) };
             m_BuildInfoDict.Add(assetBundleName, assetBundleBuild);
         }
         else
@@ -357,8 +371,8 @@ public class AssetBundleBuilder
         string[] directories = Directory.GetDirectories(directoryPath);
         for (int index = 0; index < directories.Length; index++)
         {
-            string curDirectoryPath = directoryPath + "/" + directories[index];
-            string curUserName = userName + "/" + directories[index];
+            string curDirectoryPath = directories[index].Replace("\\", "/");
+            string curUserName = directories[index].Replace("\\", "/").Replace(directoryPath, userName);
 
             AssetBundleBuild_DirectoryToAssetBundle(curDirectoryPath, curUserName);
         }
@@ -377,6 +391,7 @@ public class AssetBundleBuilder
         }
 
         string assetBundleName = directoryName;
+        assetBundleName = assetBundleName.Replace(AssetPath, string.Empty);
 
         BuildInfo assetBundleBuild;
         if (!m_BuildInfoDict.TryGetValue(assetBundleName, out assetBundleBuild))
@@ -406,7 +421,7 @@ public class AssetBundleBuilder
                 for (int index = 0; index < searchFiles.Length; index++)
                 {
                     string fileName = Path.GetFileName(searchFiles[index]);
-                    if (fileName.EndsWith(".meta") || fileName.StartsWith("."))
+                    if (fileName.EndsWith(".meta") || fileName.EndsWith(".nametip") || fileName.StartsWith("."))
                     {
                         continue;
                     }
@@ -416,12 +431,33 @@ public class AssetBundleBuilder
                     {
                         file = file.Replace(rootPath, string.Empty);
                     }
+                    file = file.Replace(AssetPath, string.Empty);
+
                     fileList.Add(file);
                 }
             }
             else
             {
-                fileList.AddRange(Directory.GetFiles(path, "*." + pattern[i], searchOption));
+                string[] files = Directory.GetFiles(path, "*." + pattern[i], searchOption);
+                for(int index = 0;index<files.Length;index++)
+                {
+                    string file = files[index];
+
+                    string fileName = Path.GetFileName(file);
+                    if (fileName.EndsWith(".meta") || fileName.EndsWith(".nametip") || fileName.StartsWith("."))
+                    {
+                        continue;
+                    }
+
+                    file = file.Replace("\\", "/");
+                    if (!string.IsNullOrEmpty(rootPath))
+                    {
+                        file = file.Replace(rootPath, string.Empty);
+                    }
+                    file = file.Replace(AssetPath, string.Empty);
+
+                    fileList.Add(file);
+                }
             }
         }
     }

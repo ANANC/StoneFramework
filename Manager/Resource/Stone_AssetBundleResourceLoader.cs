@@ -1,17 +1,46 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static Stone_ResourceManager;
 
 public class Stone_AssetBundleResourceLoader : Stone_IResourceLoader
 {
     private AssetBundleManifest m_AssetBundleManifest;
 
-    private Dictionary<string, AssetBundle> m_LoadAssetBundleDict = new Dictionary<string, AssetBundle>();
+    private Dictionary<string, AssetBundle> m_LoadAssetBundleDict;
+    private Dictionary<string, ConfigureInfo> m_AssetBundleNameToInfoDict;
 
     public void Init()
     {
+        m_LoadAssetBundleDict = new Dictionary<string, AssetBundle>();
+        m_AssetBundleNameToInfoDict = new Dictionary<string, ConfigureInfo>();
+
         AssetBundle assetbundle = AssetBundle.LoadFromFile(Stone_RunTimeTool.GetRealPath("Main"));
         m_AssetBundleManifest = assetbundle.LoadAsset("AssetBundleManifest") as AssetBundleManifest;
+
+        Stone_UserConfigManager userConfigManager = Stone_RunTime.GetManager<Stone_UserConfigManager>(Stone_UserConfigManager.Name);
+        AssetbundleConfigure configureInfos = userConfigManager.GetConfig<AssetbundleConfigure>();
+        if (configureInfos == null)
+        {
+            LogHelper.Error?.Log(Stone_ResourceManager.Name, "Stone_AssetBundleResourceLoader", "get configureInfos Fail");
+        }
+        else
+        {
+            ConfigureInfo[] assetBundleConfigures = configureInfos.Configures;
+            for (int index = 0; index < assetBundleConfigures.Length; index++)
+            {
+                ConfigureInfo info = assetBundleConfigures[index];
+
+                if (!string.IsNullOrEmpty(info.AssetBundlePackagePath))
+                {
+                    m_AssetBundleNameToInfoDict.Add(info.AssetBundlePackagePath, info);
+                }
+                if (!string.IsNullOrEmpty(info.AssetBundlePackageUserName))
+                {
+                    m_AssetBundleNameToInfoDict.Add(info.AssetBundlePackageUserName, info);
+                }
+            }
+        }
     }
 
     public void UnInit()
@@ -21,12 +50,12 @@ public class Stone_AssetBundleResourceLoader : Stone_IResourceLoader
 
     public T LoadResource<T>(string resourcePath, string assetbundle) where T : Object
     {
-        if(string.IsNullOrEmpty(assetbundle))
+        if (string.IsNullOrEmpty(assetbundle))
         {
             assetbundle = resourcePath;
         }
 
-        string assetBundleName = assetbundle + ".unity3d";
+        string assetBundleName = assetbundle;
 
         AssetBundle resAssetBundle = null;
         if (!m_LoadAssetBundleDict.TryGetValue(assetBundleName, out resAssetBundle))
@@ -42,50 +71,93 @@ public class Stone_AssetBundleResourceLoader : Stone_IResourceLoader
 
             //加载ab
             resAssetBundle = LoadAssetBundle(assetBundleName);
+
         }
 
-        if (resAssetBundle != null)
+        if (resAssetBundle == null)
         {
-            resourcePath = resourcePath.ToLower();
+            LogHelper.Error?.Log(Stone_ResourceManager.Name, "AB模式下找不到AssetBundle。", assetbundle);
+            return null;
+        }
 
-            string[] assetBundleNames = resAssetBundle.GetAllAssetNames();
-            for (int index = 0; index < assetBundleNames.Length; index++)
+        resourcePath = resourcePath.ToLower();
+
+        string assetbundleName = string.Empty;
+        string[] assetBundleNames = resAssetBundle.GetAllAssetNames();
+        for (int index = 0; index < assetBundleNames.Length; index++)
+        {
+            string name = assetBundleNames[index];
+            string nameWithoutExtension = name;
+            int extensionIndex = nameWithoutExtension.LastIndexOf('.');
+            if (extensionIndex != -1)
             {
-                string assetBunldNameWithoutExtension = assetBundleNames[index];
-                int extensionIndex = assetBunldNameWithoutExtension.LastIndexOf('.');
-                if (extensionIndex != -1)
-                {
-                    assetBunldNameWithoutExtension = assetBunldNameWithoutExtension.Substring(0, extensionIndex);
-                }
+                nameWithoutExtension = nameWithoutExtension.Substring(0, extensionIndex);
+            }
 
-                if (assetBunldNameWithoutExtension.EndsWith(resourcePath))
-                {
-                    //实例化
-                    T instance = resAssetBundle.LoadAsset<T>(assetBundleNames[index]);
-                    return instance;
-                }
+            if (name.EndsWith(resourcePath) || nameWithoutExtension.EndsWith(resourcePath))
+            {
+                assetbundleName = name;
+                break;
             }
         }
 
+        if (!string.IsNullOrEmpty(assetbundleName))
+        {
+            //实例化
+            T instance = resAssetBundle.LoadAsset<T>(assetbundleName);
+            return instance;
+        }
+
+        LogHelper.Error?.Log(Stone_ResourceManager.Name, "AB模式下找不到资源。", resourcePath);
         return null;
     }
 
     private AssetBundle LoadAssetBundle(string assetBundleName)
     {
-        AssetBundle resAssetBundle = null;
-        if (!m_LoadAssetBundleDict.TryGetValue(assetBundleName, out resAssetBundle))
+        string assetBundleDirectoryName = IOHelper.GetDirectoryName(assetBundleName);
+
+        AssetBundle resAssetBundle;
+        do
         {
-            string fullPath = Stone_RunTimeTool.GetRealPath(assetBundleName);
+            if (m_LoadAssetBundleDict.TryGetValue(assetBundleName, out resAssetBundle))
+            {
+                break;
+            }
+
+            if (m_LoadAssetBundleDict.TryGetValue(assetBundleDirectoryName, out resAssetBundle))
+            {
+                break;
+            }
+
+            ConfigureInfo configureInfo;
+            if (!m_AssetBundleNameToInfoDict.TryGetValue(assetBundleName,out configureInfo))
+            {
+                m_AssetBundleNameToInfoDict.TryGetValue(assetBundleDirectoryName, out configureInfo);
+            }
+
+            if(configureInfo==null)
+            {
+                break;
+            }
+
+            string fileName = configureInfo.AssetBundlePackageUserName;
+            if(string.IsNullOrEmpty(fileName))
+            {
+                fileName = configureInfo.AssetBundlePackagePath;
+            }
+            string assetBundleFileName = fileName.Replace("/", "@");
+            assetBundleFileName += ".unity3d";
+
+            string fullPath = Stone_RunTimeTool.GetRealPath(assetBundleFileName);
             resAssetBundle = AssetBundle.LoadFromFile(fullPath);
             if (resAssetBundle != null)
             {
-                m_LoadAssetBundleDict.Add(assetBundleName, resAssetBundle);
+                m_LoadAssetBundleDict.Add(fileName, resAssetBundle);
+                break;
             }
-            else
-            {
-                Debug.Log("【assetbundle load】 fail! path:" + fullPath);
-            }
-        }
+
+
+        } while (false);
 
         return resAssetBundle;
     }

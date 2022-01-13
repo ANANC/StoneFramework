@@ -3,33 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using static Stone_ResourceManager;
 
 public class Stone_EditorResourceLoader : Stone_IResourceLoader
 {
-    public enum ConfigureType
-    {
-        File        = 1, //原文件拷贝
-        Directory   = 2, //原目录拷贝
-        F2O         = 3, //单独文件打包成一个AB
-        EF2O        = 4, //文件夹下的每一个文件打包成一个AB   递归
-        D2O         = 5, //整个文件夹打包成一个AB  递归
-        ED2O        = 6, //目录下每个文件夹达成一个AB 不递归
-    }
-
-    [SerializeField]
-    public class AssetbundleConfigure : Stone_BaseUserConfigData
-    {
-        public ConfigureInfo[] Configures;
-    }
-
-    public class ConfigureInfo
-    {
-        public int ConfigureType;                    //配置类型 对应枚举ConfigureType
-        public string AssetBundlePackagePath;        //ab包路径
-        public string AssetBundlePackageUserName;    //ab包使用别名
-        public bool IsBuildDependent;                //是否打包依赖
-    }
-
     private string m_ResourceRootFullPath;
     private string m_ProjectPath;
 
