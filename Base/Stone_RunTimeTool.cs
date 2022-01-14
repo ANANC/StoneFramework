@@ -15,7 +15,6 @@ public static class Stone_RunTimeTool
     /// 取得数据存放目录
     /// </summary>
     private static string m_DataPath = string.Empty;
-
     public static string DataPath
     {
         get
@@ -82,40 +81,66 @@ public static class Stone_RunTimeTool
         }
     }
 
-    public static bool DoublePath
-    {
-        get
-        {
-            if (Application.platform == RuntimePlatform.Android)
-            {
-                return false;
-            }
-            return true;
-        }
-    }
 
-    public static string GetRealPath(string filename)
+    public static string GetPlatformFilePath(string fileName)
     {
-        if (DoublePath)
+        string platformFilePath;
+        if (Application.platform != RuntimePlatform.Android)
         {
-            string persistentPath = DataPath + filename;
-            if (File.Exists(persistentPath))
+            do
             {
-                return persistentPath;
-            }
-            else
-            {
-                persistentPath = AppContentPath + filename;
-                if(File.Exists(persistentPath))
+                platformFilePath = DataPath + fileName;
+                if (File.Exists(platformFilePath))
                 {
-                    return persistentPath;
+                    break;
                 }
-                return EditorPath + filename;
-            }
+
+                platformFilePath = AppContentPath + fileName;
+                if (File.Exists(platformFilePath))
+                {
+                    break;
+                }
+
+                platformFilePath = EditorPath + fileName;
+
+            } while (false);
         }
         else
         {
-            return DataPath + filename;
+            platformFilePath = DataPath + fileName;
         }
+
+        return platformFilePath;
+    }
+
+    public static string GetPlatformDirectoryPath(string directoryName)
+    {
+        string platformFilePath;
+        if (Application.platform != RuntimePlatform.Android)
+        {
+            do
+            {
+                platformFilePath = DataPath + directoryName;
+                if (Directory.Exists(platformFilePath))
+                {
+                    break;
+                }
+
+                platformFilePath = AppContentPath + directoryName;
+                if (Directory.Exists(platformFilePath))
+                {
+                    break;
+                }
+
+                platformFilePath = EditorPath + directoryName;
+
+            } while (false);
+        }
+        else
+        {
+            platformFilePath = DataPath + directoryName;
+        }
+
+        return platformFilePath;
     }
 }

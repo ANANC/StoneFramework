@@ -15,7 +15,7 @@ public class Stone_AssetBundleResourceLoader : Stone_IResourceLoader
         m_LoadAssetBundleDict = new Dictionary<string, AssetBundle>();
         m_AssetBundleNameToInfoDict = new Dictionary<string, ConfigureInfo>();
 
-        AssetBundle assetbundle = AssetBundle.LoadFromFile(Stone_RunTimeTool.GetRealPath("Main"));
+        AssetBundle assetbundle = AssetBundle.LoadFromFile(Stone_RunTimeTool.GetPlatformFilePath("Main"));
         m_AssetBundleManifest = assetbundle.LoadAsset("AssetBundleManifest") as AssetBundleManifest;
 
         Stone_UserConfigManager userConfigManager = Stone_RunTime.GetManager<Stone_UserConfigManager>(Stone_UserConfigManager.Name);
@@ -148,7 +148,7 @@ public class Stone_AssetBundleResourceLoader : Stone_IResourceLoader
             string assetBundleFileName = fileName.Replace("/", "@");
             assetBundleFileName += ".unity3d";
 
-            string fullPath = Stone_RunTimeTool.GetRealPath(assetBundleFileName);
+            string fullPath = Stone_RunTimeTool.GetPlatformFilePath(assetBundleFileName);
             resAssetBundle = AssetBundle.LoadFromFile(fullPath);
             if (resAssetBundle != null)
             {

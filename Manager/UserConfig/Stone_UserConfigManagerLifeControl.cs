@@ -12,18 +12,18 @@ public class Stone_UserConfigManagerLifeControl : Stone_IManagerLifeControl
         Stone_UserConfigManager userConfigManager = (Stone_UserConfigManager)manager;
 
         //配置文件文件夹
-        string configFolderFullPath = Stone_RunTimeTool.GetRealPath(ConfigFolder);
+        string configFolderFullPath = Stone_RunTimeTool.GetPlatformDirectoryPath(ConfigFolder);
         userConfigManager.SetConfigFolderPath(configFolderFullPath);
 
         //配置文件
         //后续：在打包的时候，生成列表文件读取
-        string configFloderFullPath = Application.dataPath + "/" + ConfigFolder;
+        string configFloderFullPath = Stone_RunTimeTool.GetPlatformDirectoryPath(ConfigFolder);
         string[] filePaths = Directory.GetFiles(configFloderFullPath, "*.txt", SearchOption.AllDirectories);
-        for(int index = 0;index<filePaths.Length;index++)
+        for (int index = 0; index < filePaths.Length; index++)
         {
             string filePath = filePaths[index];
-            
-            filePath = filePath.Replace("\\","/").Replace(configFloderFullPath, string.Empty);
+
+            filePath = filePath.Replace("\\", "/").Replace(configFloderFullPath, string.Empty);
             if (filePath.StartsWith("/"))
             {
                 filePath = filePath.Substring(1, filePath.Length - 1);

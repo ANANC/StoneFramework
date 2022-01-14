@@ -237,6 +237,7 @@ public class AssetBundleBuilder
         {
             userName = filePath;
         }
+        userName = userName.Replace(AssetPath, string.Empty);
 
         string newPath = m_OutputPath + "/" + userName;
         IOHelper.SafeCreateDirectory(IOHelper.GetDirectoryPath(newPath));
@@ -256,8 +257,23 @@ public class AssetBundleBuilder
             userName = directoryPath;
         }
 
-        string newPath = m_OutputPath + "/" + userName;
-        IOHelper.SafeDirectoryCopy(true,directoryPath, newPath);
+        List<string> fileList = new List<string>();
+        GetDirectoryFiles(fileList, string.Empty, directoryPath, new[] { "*" }, SearchOption.AllDirectories);
+
+        for (int index = 0; index < fileList.Count; index++)
+        {
+            string filePath = fileList[index];
+            if (filePath.EndsWith(".meta") || filePath.EndsWith(".nametip") || filePath.StartsWith("."))
+            {
+                continue;
+            }
+
+            string fileName = filePath.Replace(userName, string.Empty);
+            string newPath = m_OutputPath + "/" + fileName;
+
+            IOHelper.SafeFileCopy(true, AssetPath + filePath, newPath);
+        }
+
     }
 
     private void BuildConfigure_FileToAB(bool dependent, string filePath, string userName = null) //"Game/Reousrce/Prefab/A"
