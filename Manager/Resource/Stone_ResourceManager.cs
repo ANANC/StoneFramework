@@ -80,7 +80,7 @@ public class Stone_ResourceManager : Stone_Manager
     /// <typeparam name="T"></typeparam>
     /// <param name="path"></param>
     /// <returns></returns>
-    public T LoadResource<T>(string path,string assetbundle=null) where T : UnityEngine.Object
+    public T LoadResource<T>(string path, string assetbundle = null) where T : UnityEngine.Object
     {
         Object resObject = null;
 
@@ -135,11 +135,23 @@ public class Stone_ResourceManager : Stone_Manager
 
     //------------ 安全销毁 ------------
 
+    public void DestroyGameObject(Transform transform)
+    {
+        if (transform != null)
+        {
+            DestroyGameObject(transform.gameObject);
+        }
+        else
+        {
+            LogHelper.Trace?.Log("资源失败失败！因为资源为空");
+        }
+    }
+
     public void DestroyGameObject(GameObject go)
     {
         if (go == null)
         {
-            Debug.LogError("资源失败失败！因为资源为空");
+            LogHelper.Trace?.Log("资源失败失败！因为资源为空");
             return;
         }
         GameObject.Destroy(go);

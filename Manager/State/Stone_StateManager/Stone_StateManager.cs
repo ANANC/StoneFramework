@@ -60,7 +60,7 @@ public class Stone_StateManager : Stone_Manager
     /// <param name="stateName"></param>
     public void DeleteState(string stateName)
     {
-        if(m_CurState.GetName() == stateName)
+        if(m_CurState?.GetName() == stateName)
         {
             return;
         }

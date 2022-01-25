@@ -229,7 +229,7 @@ public class Stone_UIManager : Stone_Manager
     private void GetAllChildByTrace(Stone_UIObject parent, List<Stone_UIObject> childTrace)
     {
         List<Stone_UIObject> childs = parent.GetAllChild();
-        int childCount = childs.Count;
+        int childCount = childs == null ? 0 : childs.Count;
 
         if (childCount == 0)
         {
@@ -264,6 +264,13 @@ public class Stone_UIManager : Stone_Manager
                 uiObject.Close();
             }
             m_UIObjectOpenDict.Remove(uiObject);
+        }
+
+        m_UIName2UIObjectDict.Remove(uiObject.GetUIName());
+        List<Stone_UIObject> resourceList;
+        if (m_ResourceName2UIObjectDict.TryGetValue(uiObject.GetResourceName(), out resourceList))
+        {
+            resourceList.Remove(uiObject);
         }
 
         uiObject.Destroy();

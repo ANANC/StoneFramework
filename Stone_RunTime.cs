@@ -32,14 +32,25 @@ public class Stone_RunTime
     // --- 静态函数
 
     // 获取管理器
-    public static T GetManager<T>(string managerName) where T:Stone_Manager
+    public static T GetManager<T>(string managerName) where T : Stone_Manager
     {
         return Current?.GetCoreControl()?.GetManager<T>(managerName);
     }
 
     // 添加管理器
-    public static Stone_Manager AddManager(Stone_Manager manager,bool isUpdate = false)
+    public static Stone_Manager AddManager(Stone_Manager manager, bool isUpdate = false)
     {
         return Current?.GetCoreControl()?.AddManager(manager, isUpdate);
+    }
+
+    // 删除管理器
+    public static void DeleteManager<T>(string managerName) where T : Stone_Manager
+    {
+        Stone_Manager manager = GetManager<T>(managerName);
+        if(manager == null)
+        {
+            return;
+        }
+        Current?.GetCoreControl()?.DeleteManager(manager);
     }
 }
