@@ -23,4 +23,16 @@ public static class DoTweenHelper
 
         sequenceDict.Add(name, sequence);
     }
+
+    public static void AddSequenceBySingleRun(this Dictionary<string, Sequence> sequenceDict, string name, Sequence sequence)
+    {
+        Sequence tween;
+        if (sequenceDict.TryGetValue(name,out tween))
+        {
+            tween.Kill();
+            sequenceDict.Remove(name);
+        }
+
+        sequenceDict.Add(name, sequence);
+    }
 }
